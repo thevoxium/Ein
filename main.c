@@ -1,11 +1,13 @@
 #include "src/lexer.h"
-#include <string.h>
+#include "src/utils.h"
 
 int main() {
-  char check[] =
-      "func= += ! !=  > >= < <= == -> test(A: tensor<10xf32>) -> { return A; }";
 
-  Lexer *lexer = init_lexer(check, strnlen(check, 100));
+  long len;
+  char file_name[] = "examples/matmul.ein";
+  char *input = read_ein_file(file_name, &len);
+
+  Lexer *lexer = init_lexer(input, len);
 
   scan(lexer);
 

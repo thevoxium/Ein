@@ -98,9 +98,16 @@ void skip_whitespace(Lexer *lexer) {
   if (lexer == NULL) {
     return;
   }
-  while (lexer->position < lexer->total_length &&
-         lexer->input[lexer->position] == ' ') {
-    lexer->position++;
+  while (lexer->position < lexer->total_length) {
+    char c = lexer->input[lexer->position];
+    if (c == ' ' || c == '\t' || c == '\r') {
+      lexer->position++;
+    } else if (c == '\n') {
+      lexer->line++;
+      lexer->position++;
+    } else {
+      break;
+    }
   }
 }
 
@@ -146,6 +153,10 @@ void scan(Lexer *lexer) {
   while (lexer->position < lexer->total_length &&
          lexer->input[lexer->position] != '\0') {
     skip_whitespace(lexer);
+    if (lexer->position >= lexer->total_length ||
+        lexer->input[lexer->position] == '\0') {
+      break;
+    }
     t = NULL;
 
     char c = lexer->input[lexer->position];
@@ -272,12 +283,15 @@ void scan(Lexer *lexer) {
       break;
     default: {
       int current_position = lexer->position;
-      while (current_position < lexer->total_length &&
-             lexer->input[current_position] != ' ') {
+      while (current_position < lexer->total_length) {
         char c = lexer->input[current_position];
+        if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
+          break;
+        }
         if (c == '+' || c == '-' || c == '(' || c == ')' || c == '{' ||
             c == '}' || c == '!' || c == '>' || c == '<' || c == ',' ||
-            c == ':' || c == ';' || c == '=' || c == '*') {
+            c == ':' || c == ';' || c == '=' || c == '*' || c == '[' ||
+            c == ']') {
           break;
         }
 
@@ -297,6 +311,8 @@ void scan(Lexer *lexer) {
 
       if (strcmp(literal, "func") == 0) {
         t = create_token(literal, FUNC, lexer->line);
+      } else if (strcmp(literal, "range") == 0) {
+        t = create_token(literal, RANGE, lexer->line);
       } else if (strcmp(literal, "for") == 0) {
         t = create_token(literal, FOR, lexer->line);
       } else if (strcmp(literal, "if") == 0) {
