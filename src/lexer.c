@@ -1,6 +1,4 @@
 #include "lexer.h"
-#include <stdbool.h>
-#include <string.h>
 
 bool isalphanumeric(char *str) {
   if (str == NULL || *str == '\0') {

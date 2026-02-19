@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 
 typedef enum TokenType {
@@ -64,8 +65,14 @@ typedef struct Lexer {
 Lexer *init_lexer(char *input, int total_length);
 void free_lexer(Lexer *lexer);
 
+bool isalphanumeric(char *str);
+bool isint(const char *str);
+bool isfloat(const char *str);
 void scan(Lexer *lexer);
 void skip_whitespace(Lexer *lexer);
+void grow_lexer(Lexer *lexer);
+Token *create_token(char *literal, TokenType tokenType, int line);
+void add_token(Lexer *lexer, Token *token);
 void print_tokens(Lexer *lexer);
 
 #endif // !LEXER_H
