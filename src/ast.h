@@ -38,7 +38,7 @@ struct ASTNode {
   union {
     struct {
       ASTNode **functions;
-      int function;
+      int function_count;
     } program;
 
     struct {
@@ -90,6 +90,10 @@ struct ASTNode {
     } float_literal;
 
     struct {
+      char *name;
+    } identifier;
+
+    struct {
       TokenType op;
       ASTNode *left;
       ASTNode *right;
@@ -119,5 +123,31 @@ struct ASTNode {
 
   } data;
 };
+
+ASTNode *create_node(NodeType nodeType, int line);
+ASTNode *ast_node_program(ASTNode **functions, int function_count, int line);
+ASTNode *ast_node_function_decl(char *name, ASTNode **params, int count_params,
+                                ASTNode *return_type, ASTNode *body, int line);
+ASTNode *ast_node_block(ASTNode **statements, int count_statements, int line);
+ASTNode *ast_var_decl(char *name, ASTNode *type, ASTNode *initializer, int line);
+ASTNode *ast_node_var_decl(char *name, ASTNode *type, ASTNode *initializer,
+                           int line);
+ASTNode *ast_node_assignment(ASTNode *target, ASTNode *value, int line);
+ASTNode *ast_node_for(ASTNode *variable, ASTNode *iterable, ASTNode *body,
+                      int line);
+ASTNode *ast_node_if(ASTNode *condition, ASTNode *then_block,
+                     ASTNode *else_block, int line);
+ASTNode *ast_node_return(ASTNode *return_val, int line);
+ASTNode *ast_node_int_literal(long value, int line);
+ASTNode *ast_node_float_literal(double value, int line);
+ASTNode *ast_node_identifier(char *name, int line);
+ASTNode *ast_node_binary_expr(TokenType op, ASTNode *left, ASTNode *right,
+                              int line);
+ASTNode *ast_node_unary_expr(TokenType op, ASTNode *operand, int line);
+ASTNode *ast_node_index_expr(ASTNode *object, ASTNode **indices, int line);
+ASTNode *ast_node_func_call(char *func_name, ASTNode **args, int arg_count,
+                            int line);
+ASTNode *ast_node_tensor_type(char **dims, int dim_count, char *data_type,
+                              int line);
 
 #endif // !AST_H
