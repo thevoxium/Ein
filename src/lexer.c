@@ -162,125 +162,147 @@ void scan(Lexer *lexer) {
     char c = lexer->input[lexer->position];
     switch (c) {
     case '(':
-      t = create_token("(", LEFT_PAREN, lexer->line);
-      add_token(lexer, t);
-      lexer->position++;
-      break;
     case ')':
-      t = create_token(")", RIGHT_PAREN, lexer->line);
-      add_token(lexer, t);
-      lexer->position++;
-      break;
     case '[':
-      t = create_token("[", LEFT_BRACKET, lexer->line);
-      add_token(lexer, t);
-      lexer->position++;
-      break;
     case ']':
-      t = create_token("]", RIGHT_BRACKET, lexer->line);
-      add_token(lexer, t);
-      lexer->position++;
-      break;
     case '{':
-      t = create_token("{", LEFT_BRACE, lexer->line);
-      add_token(lexer, t);
-      lexer->position++;
-      break;
     case '}':
-      t = create_token("}", RIGHT_BRACE, lexer->line);
-      add_token(lexer, t);
-      lexer->position++;
-      break;
     case ',':
-      t = create_token(",", COMMA, lexer->line);
-      add_token(lexer, t);
-      lexer->position++;
-      break;
     case ':':
-      t = create_token(":", COLON, lexer->line);
-      add_token(lexer, t);
-      lexer->position++;
-      break;
     case '*':
-      t = create_token("*", STAR, lexer->line);
+    case ';': {
+      char *literal = NULL;
+      TokenType token_type = UNKNOWN;
+
+      switch (c) {
+      case '(':
+        literal = "(";
+        token_type = LEFT_PAREN;
+        break;
+      case ')':
+        literal = ")";
+        token_type = RIGHT_PAREN;
+        break;
+      case '[':
+        literal = "[";
+        token_type = LEFT_BRACKET;
+        break;
+      case ']':
+        literal = "]";
+        token_type = RIGHT_BRACKET;
+        break;
+      case '{':
+        literal = "{";
+        token_type = LEFT_BRACE;
+        break;
+      case '}':
+        literal = "}";
+        token_type = RIGHT_BRACE;
+        break;
+      case ',':
+        literal = ",";
+        token_type = COMMA;
+        break;
+      case ':':
+        literal = ":";
+        token_type = COLON;
+        break;
+      case '*':
+        literal = "*";
+        token_type = STAR;
+        break;
+      default:
+        literal = ";";
+        token_type = SEMICOLON;
+        break;
+      }
+
+      t = create_token(literal, token_type, lexer->line);
       add_token(lexer, t);
       lexer->position++;
       break;
-    case ';':
-      t = create_token(";", SEMICOLON, lexer->line);
-      add_token(lexer, t);
-      lexer->position++;
-      break;
+    }
     case '-':
-      if (lexer->position + 1 < lexer->total_length &&
-          lexer->input[lexer->position + 1] == '>') {
-        t = create_token("->", ARROW, lexer->line);
-        lexer->position += 2;
-      } else if (lexer->position + 1 < lexer->total_length &&
-                 lexer->input[lexer->position + 1] == '=') {
-        t = create_token("-=", MINUS_EQUAL, lexer->line);
-        lexer->position += 2;
-      } else {
-        t = create_token("-", MINUS, lexer->line);
-        lexer->position++;
-      }
-      add_token(lexer, t);
-      break;
     case '+':
-      if (lexer->position + 1 < lexer->total_length &&
-          lexer->input[lexer->position + 1] == '=') {
-        t = create_token("+=", PLUS_EQUAL, lexer->line);
-        lexer->position += 2;
-      } else {
-        t = create_token("+", PLUS, lexer->line);
-        lexer->position++;
-      }
-      add_token(lexer, t);
-      break;
     case '=':
-      if (lexer->position + 1 < lexer->total_length &&
-          lexer->input[lexer->position + 1] == '=') {
-        t = create_token("==", EQUAL_EQUAL, lexer->line);
-        lexer->position += 2;
-      } else {
-        t = create_token("=", EQUAL, lexer->line);
-        lexer->position++;
-      }
-      add_token(lexer, t);
-      break;
     case '<':
-      if (lexer->position + 1 < lexer->total_length &&
-          lexer->input[lexer->position + 1] == '=') {
-        t = create_token("<=", LESS_EQUAL, lexer->line);
-        lexer->position += 2;
-      } else {
-        t = create_token("<", LESS, lexer->line);
-        lexer->position++;
-      }
-      add_token(lexer, t);
-      break;
     case '>':
-      if (lexer->position + 1 < lexer->total_length &&
-          lexer->input[lexer->position + 1] == '=') {
-        t = create_token(">=", GREATER_EQUAL, lexer->line);
-        lexer->position += 2;
-      } else {
-        t = create_token(">", GREATER, lexer->line);
-        lexer->position++;
+    case '!': {
+      char next = '\0';
+      if (lexer->position + 1 < lexer->total_length) {
+        next = lexer->input[lexer->position + 1];
       }
-      add_token(lexer, t);
-      break;
-    case '!':
-      if (lexer->position + 1 < lexer->total_length &&
-          lexer->input[lexer->position + 1] == '=') {
-        t = create_token("!=", BANG_EQUAL, lexer->line);
-        lexer->position += 2;
+
+      int advance = 1;
+      char *literal = NULL;
+      TokenType token_type = UNKNOWN;
+
+      if (c == '-' && next == '>') {
+        literal = "->";
+        token_type = ARROW;
+        advance = 2;
+      } else if (next == '=') {
+        advance = 2;
+        switch (c) {
+        case '-':
+          literal = "-=";
+          token_type = MINUS_EQUAL;
+          break;
+        case '+':
+          literal = "+=";
+          token_type = PLUS_EQUAL;
+          break;
+        case '=':
+          literal = "==";
+          token_type = EQUAL_EQUAL;
+          break;
+        case '<':
+          literal = "<=";
+          token_type = LESS_EQUAL;
+          break;
+        case '>':
+          literal = ">=";
+          token_type = GREATER_EQUAL;
+          break;
+        default:
+          literal = "!=";
+          token_type = BANG_EQUAL;
+          break;
+        }
       } else {
-        t = create_token("!", BANG, lexer->line);
-        lexer->position++;
+        switch (c) {
+        case '-':
+          literal = "-";
+          token_type = MINUS;
+          break;
+        case '+':
+          literal = "+";
+          token_type = PLUS;
+          break;
+        case '=':
+          literal = "=";
+          token_type = EQUAL;
+          break;
+        case '<':
+          literal = "<";
+          token_type = LESS;
+          break;
+        case '>':
+          literal = ">";
+          token_type = GREATER;
+          break;
+        default:
+          literal = "!";
+          token_type = BANG;
+          break;
+        }
       }
+
+      t = create_token(literal, token_type, lexer->line);
       add_token(lexer, t);
+      lexer->position += advance;
       break;
+    }
     default: {
       int current_position = lexer->position;
       while (current_position < lexer->total_length) {
@@ -379,6 +401,7 @@ void print_tokens(Lexer *lexer) {
         (token_type >= 0 && (size_t)token_type < token_type_count)
             ? token_type_names[token_type]
             : "INVALID_TOKEN_TYPE";
-    printf("literal: %s | type: %s\n", literal, token_type_name);
+    printf("line: %d | literal: %s | type: %s\n", lexer->token_list[i].line,
+           literal, token_type_name);
   }
 }
