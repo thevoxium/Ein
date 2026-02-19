@@ -1,9 +1,9 @@
 #ifndef LEXER_H
 #define LEXER_H
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 
 typedef enum TokenType {
@@ -41,7 +41,9 @@ typedef enum TokenType {
   COMMA,
   COLON,
   SEMICOLON,
-  UNKNOWN
+  UNKNOWN,
+  LEFT_BRACKET,
+  RIGHT_BRACKET,
 } TokenType;
 
 typedef struct Token {

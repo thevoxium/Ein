@@ -1,0 +1,13 @@
+func matmul(A: tensor<MxKxf32>, B: tensor<KxNxf32>) -> tensor<MxNxf32> {
+  C: tensor<MxNxf32> = 0.0
+  
+  for i in range(0, M) {
+    for j in range(0, N) {
+      for k in range(0, K) {
+        C[i, j] = C[i, j] + A[i, k] * B[k, j]
+      }
+    }
+  }
+  
+  return C
+}

@@ -160,6 +160,16 @@ void scan(Lexer *lexer) {
       add_token(lexer, t);
       lexer->position++;
       break;
+    case '[':
+      t = create_token("[", LEFT_BRACKET, lexer->line);
+      add_token(lexer, t);
+      lexer->position++;
+      break;
+    case ']':
+      t = create_token("]", RIGHT_BRACKET, lexer->line);
+      add_token(lexer, t);
+      lexer->position++;
+      break;
     case '{':
       t = create_token("{", LEFT_BRACE, lexer->line);
       add_token(lexer, t);
@@ -332,13 +342,16 @@ void print_tokens(Lexer *lexer) {
     return;
   }
   char *token_type_names[] = {
-      "IDENTIFIER",  "FUNC",    "FOR",           "IN",          "RANGE",
-      "IF",          "ELSE",    "RETURN",        "TENSOR",      "INT",
-      "FLOAT",       "EQUAL",   "PLUS_EQUAL",    "MINUS_EQUAL", "PLUS",
-      "MINUS",       "STAR",    "EQUAL_EQUAL",   "BANG_EQUAL",  "LESS",
-      "LESS_EQUAL",  "GREATER", "GREATER_EQUAL", "AND",         "OR",
-      "BANG",        "ARROW",   "LEFT_PAREN",    "RIGHT_PAREN", "LEFT_BRACE",
-      "RIGHT_BRACE", "COMMA",   "COLON",         "SEMICOLON",   "UNKNOWN"};
+      "IDENTIFIER",   "FUNC",        "FOR",           "IN",
+      "RANGE",        "IF",          "ELSE",          "RETURN",
+      "TENSOR",       "INT",         "FLOAT",         "EQUAL",
+      "PLUS_EQUAL",   "MINUS_EQUAL", "PLUS",          "MINUS",
+      "STAR",         "EQUAL_EQUAL", "BANG_EQUAL",    "LESS",
+      "LESS_EQUAL",   "GREATER",     "GREATER_EQUAL", "AND",
+      "OR",           "BANG",        "ARROW",         "LEFT_PAREN",
+      "RIGHT_PAREN",  "LEFT_BRACE",  "RIGHT_BRACE",   "COMMA",
+      "COLON",        "SEMICOLON",   "UNKNOWN",       "LEFT_BRACKET",
+      "RIGHT_BRACKET"};
   size_t token_type_count =
       sizeof(token_type_names) / sizeof(token_type_names[0]);
   for (int i = 0; i < lexer->token_count; i++) {
