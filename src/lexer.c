@@ -331,11 +331,25 @@ void print_tokens(Lexer *lexer) {
     printf("No tokens to print.\n");
     return;
   }
+  char *token_type_names[] = {
+      "IDENTIFIER",  "FUNC",    "FOR",           "IN",          "RANGE",
+      "IF",          "ELSE",    "RETURN",        "TENSOR",      "INT",
+      "FLOAT",       "EQUAL",   "PLUS_EQUAL",    "MINUS_EQUAL", "PLUS",
+      "MINUS",       "STAR",    "EQUAL_EQUAL",   "BANG_EQUAL",  "LESS",
+      "LESS_EQUAL",  "GREATER", "GREATER_EQUAL", "AND",         "OR",
+      "BANG",        "ARROW",   "LEFT_PAREN",    "RIGHT_PAREN", "LEFT_BRACE",
+      "RIGHT_BRACE", "COMMA",   "COLON",         "SEMICOLON",   "UNKNOWN"};
+  size_t token_type_count =
+      sizeof(token_type_names) / sizeof(token_type_names[0]);
   for (int i = 0; i < lexer->token_count; i++) {
-    if (lexer->token_list[i].literal != NULL) {
-      printf("%s\n", lexer->token_list[i].literal);
-    } else {
-      printf("NULL literal at token %d\n", i);
-    }
+    char *literal = lexer->token_list[i].literal != NULL
+                        ? lexer->token_list[i].literal
+                        : "NULL";
+    TokenType token_type = lexer->token_list[i].tokenType;
+    char *token_type_name =
+        (token_type >= 0 && (size_t)token_type < token_type_count)
+            ? token_type_names[token_type]
+            : "INVALID_TOKEN_TYPE";
+    printf("literal: %s | type: %s\n", literal, token_type_name);
   }
 }
