@@ -66,7 +66,7 @@ struct ASTNode {
     } assignment;
 
     struct {
-      ASTNode *varible;
+      ASTNode *variable;
       ASTNode *iterable;
       ASTNode *body;
     } for_loop;
@@ -129,7 +129,8 @@ ASTNode *ast_node_program(ASTNode **functions, int function_count, int line);
 ASTNode *ast_node_function_decl(char *name, ASTNode **params, int count_params,
                                 ASTNode *return_type, ASTNode *body, int line);
 ASTNode *ast_node_block(ASTNode **statements, int count_statements, int line);
-ASTNode *ast_var_decl(char *name, ASTNode *type, ASTNode *initializer, int line);
+ASTNode *ast_var_decl(char *name, ASTNode *type, ASTNode *initializer,
+                      int line);
 ASTNode *ast_node_var_decl(char *name, ASTNode *type, ASTNode *initializer,
                            int line);
 ASTNode *ast_node_assignment(ASTNode *target, ASTNode *value, int line);
@@ -149,5 +150,6 @@ ASTNode *ast_node_func_call(char *func_name, ASTNode **args, int arg_count,
                             int line);
 ASTNode *ast_node_tensor_type(char **dims, int dim_count, char *data_type,
                               int line);
+void free_ast(ASTNode *node);
 
 #endif // !AST_H
