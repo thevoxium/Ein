@@ -1,5 +1,92 @@
 #include "ast.h"
 
+static void print_indent(int indent) {
+  for (int i = 0; i < indent; i++) {
+    printf("  ");
+  }
+}
+
+static const char *token_type_name(TokenType tokenType) {
+  switch (tokenType) {
+  case IDENTIFIER:
+    return "IDENTIFIER";
+  case FUNC:
+    return "FUNC";
+  case FOR:
+    return "FOR";
+  case IN:
+    return "IN";
+  case RANGE:
+    return "RANGE";
+  case IF:
+    return "IF";
+  case ELSE:
+    return "ELSE";
+  case RETURN:
+    return "RETURN";
+  case TENSOR:
+    return "TENSOR";
+  case INT:
+    return "INT";
+  case FLOAT:
+    return "FLOAT";
+  case EQUAL:
+    return "EQUAL";
+  case PLUS_EQUAL:
+    return "PLUS_EQUAL";
+  case MINUS_EQUAL:
+    return "MINUS_EQUAL";
+  case PLUS:
+    return "PLUS";
+  case MINUS:
+    return "MINUS";
+  case STAR:
+    return "STAR";
+  case EQUAL_EQUAL:
+    return "EQUAL_EQUAL";
+  case BANG_EQUAL:
+    return "BANG_EQUAL";
+  case LESS:
+    return "LESS";
+  case LESS_EQUAL:
+    return "LESS_EQUAL";
+  case GREATER:
+    return "GREATER";
+  case GREATER_EQUAL:
+    return "GREATER_EQUAL";
+  case AND:
+    return "AND";
+  case OR:
+    return "OR";
+  case BANG:
+    return "BANG";
+  case ARROW:
+    return "ARROW";
+  case LEFT_PAREN:
+    return "LEFT_PAREN";
+  case RIGHT_PAREN:
+    return "RIGHT_PAREN";
+  case LEFT_BRACE:
+    return "LEFT_BRACE";
+  case RIGHT_BRACE:
+    return "RIGHT_BRACE";
+  case COMMA:
+    return "COMMA";
+  case COLON:
+    return "COLON";
+  case SEMICOLON:
+    return "SEMICOLON";
+  case UNKNOWN:
+    return "UNKNOWN";
+  case LEFT_BRACKET:
+    return "LEFT_BRACKET";
+  case RIGHT_BRACKET:
+    return "RIGHT_BRACKET";
+  default:
+    return "TOKEN_UNKNOWN";
+  }
+}
+
 ASTNode *create_node(NodeType nodeType, int line) {
   ASTNode *node = (ASTNode *)malloc(sizeof(ASTNode));
   if (!node)
@@ -190,6 +277,155 @@ ASTNode *ast_node_tensor_type(char **dims, int dim_count, char *data_type,
   node->data.tensor_type.dim_count = dim_count;
   node->data.tensor_type.data_type = data_type;
   return node;
+}
+
+void print_ast(ASTNode *node, int indent) {
+  if (!node) {
+    print_indent(indent);
+    printf("(null)\n");
+    return;
+  }
+
+  switch (node->nodeType) {
+  case NODE_PROGRAM:
+    print_indent(indent);
+    printf("Program (functions=%d)\n", node->data.program.function_count);
+    for (int i = 0; i < node->data.program.function_count; i++) {
+      print_ast(node->data.program.functions[i], indent + 1);
+    }
+    break;
+  case NODE_FUNC_DEF:
+    print_indent(indent);
+    printf("FunctionDef name=%s\n", node->data.function_decl.name);
+    print_indent(indent + 1);
+    printf("Params (%d)\n", node->data.function_decl.count_params);
+    for (int i = 0; i < node->data.function_decl.count_params; i++) {
+      print_ast(node->data.function_decl.params[i], indent + 2);
+    }
+    print_indent(indent + 1);
+    printf("ReturnType\n");
+    print_ast(node->data.function_decl.return_type, indent + 2);
+    print_indent(indent + 1);
+    printf("Body\n");
+    print_ast(node->data.function_decl.body, indent + 2);
+    break;
+  case NODE_BLOCK:
+    print_indent(indent);
+    printf("Block (statements=%d)\n", node->data.block.count_statements);
+    for (int i = 0; i < node->data.block.count_statements; i++) {
+      print_ast(node->data.block.statements[i], indent + 1);
+    }
+    break;
+  case NODE_VAR_DECL:
+    print_indent(indent);
+    printf("VarDecl name=%s\n", node->data.var_decl.name);
+    print_indent(indent + 1);
+    printf("Type\n");
+    print_ast(node->data.var_decl.type, indent + 2);
+    print_indent(indent + 1);
+    printf("Initializer\n");
+    print_ast(node->data.var_decl.initializer, indent + 2);
+    break;
+  case NODE_ASSIGNMENT:
+    print_indent(indent);
+    printf("Assignment\n");
+    print_indent(indent + 1);
+    printf("Target\n");
+    print_ast(node->data.assignment.target, indent + 2);
+    print_indent(indent + 1);
+    printf("Value\n");
+    print_ast(node->data.assignment.value, indent + 2);
+    break;
+  case NODE_FOR:
+    print_indent(indent);
+    printf("For\n");
+    print_indent(indent + 1);
+    printf("Variable\n");
+    print_ast(node->data.for_loop.variable, indent + 2);
+    print_indent(indent + 1);
+    printf("Iterable\n");
+    print_ast(node->data.for_loop.iterable, indent + 2);
+    print_indent(indent + 1);
+    printf("Body\n");
+    print_ast(node->data.for_loop.body, indent + 2);
+    break;
+  case NODE_IF:
+    print_indent(indent);
+    printf("If\n");
+    print_indent(indent + 1);
+    printf("Condition\n");
+    print_ast(node->data.if_else.condition, indent + 2);
+    print_indent(indent + 1);
+    printf("Then\n");
+    print_ast(node->data.if_else.then, indent + 2);
+    print_indent(indent + 1);
+    printf("Else\n");
+    print_ast(node->data.if_else.else_block, indent + 2);
+    break;
+  case NODE_RETURN:
+    print_indent(indent);
+    printf("Return\n");
+    print_ast(node->data.return_value.return_val, indent + 1);
+    break;
+  case NODE_INT_LITERAL:
+    print_indent(indent);
+    printf("IntLiteral value=%ld\n", node->data.int_literal.value);
+    break;
+  case NODE_FLOAT_LITERAL:
+    print_indent(indent);
+    printf("FloatLiteral value=%f\n", node->data.float_literal.value);
+    break;
+  case NODE_IDENTIFIER:
+    print_indent(indent);
+    printf("Identifier name=%s\n", node->data.identifier.name);
+    break;
+  case NODE_BINARY_EXPR:
+    print_indent(indent);
+    printf("BinaryExpr op=%s\n", token_type_name(node->data.binary_op.op));
+    print_indent(indent + 1);
+    printf("Left\n");
+    print_ast(node->data.binary_op.left, indent + 2);
+    print_indent(indent + 1);
+    printf("Right\n");
+    print_ast(node->data.binary_op.right, indent + 2);
+    break;
+  case NODE_UNARY_EXPR:
+    print_indent(indent);
+    printf("UnaryExpr op=%s\n", token_type_name(node->data.unary_op.op));
+    print_indent(indent + 1);
+    printf("Operand\n");
+    print_ast(node->data.unary_op.operand, indent + 2);
+    break;
+  case NODE_INDEX_EXPR:
+    print_indent(indent);
+    printf("IndexExpr (indices=%d)\n", node->data.index_expression.index_count);
+    print_indent(indent + 1);
+    printf("Object\n");
+    print_ast(node->data.index_expression.object, indent + 2);
+    print_indent(indent + 1);
+    printf("Indices\n");
+    for (int i = 0; i < node->data.index_expression.index_count; i++) {
+      print_ast(node->data.index_expression.indices[i], indent + 2);
+    }
+    break;
+  case NODE_FUNC_CALL:
+    print_indent(indent);
+    printf("FuncCall name=%s args=%d\n", node->data.func_call.func_name,
+           node->data.func_call.arg_count);
+    for (int i = 0; i < node->data.func_call.arg_count; i++) {
+      print_ast(node->data.func_call.args[i], indent + 1);
+    }
+    break;
+  case NODE_TENSOR_TYPE:
+    print_indent(indent);
+    printf("TensorType dtype=%s dims=%d\n", node->data.tensor_type.data_type,
+           node->data.tensor_type.dim_count);
+    for (int i = 0; i < node->data.tensor_type.dim_count; i++) {
+      print_indent(indent + 1);
+      printf("Dim[%d]=%s\n", i, node->data.tensor_type.dims[i]);
+    }
+    break;
+  }
 }
 
 void free_ast(ASTNode *node) {

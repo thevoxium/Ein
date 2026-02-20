@@ -152,6 +152,7 @@ ASTNode *ast_node_func_call(char *func_name, ASTNode **args, int arg_count,
                             int line);
 ASTNode *ast_node_tensor_type(char **dims, int dim_count, char *data_type,
                               int line);
+void print_ast(ASTNode *node, int indent);
 void free_ast(ASTNode *node);
 
 #endif // !AST_H

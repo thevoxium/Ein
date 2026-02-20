@@ -72,7 +72,11 @@ Token expect(Parser *p, TokenType tokenType) {
   exit(1);
 }
 
-// primary → INT | FLOAT | IDENTIFIER | "(" expression ")"
+// primary         ::= INT
+//                   | FLOAT
+//                   | IDENTIFIER
+//                   | "range"
+//                   | "(" expression ")" ;
 ASTNode *parse_primary(Parser *p) {
   if (check(p, INT)) {
     Token t = advance(p);
@@ -88,11 +92,9 @@ ASTNode *parse_primary(Parser *p) {
     Token t = advance(p);
     return ast_node_identifier(t.literal, t.line);
   }
-  if (check(p, LEFT_PAREN)) {
+  if (check(p, RANGE)) {
     Token t = advance(p);
-    ASTNode *expr = parse_expr(p);
-    expect(p, RIGHT_PAREN);
-    return expr;
+    return ast_node_identifier(t.literal, t.line);
   }
 
   fprintf(stderr, "Parse error at line %d: unexpected token '%s'\n",
