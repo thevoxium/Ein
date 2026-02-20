@@ -1,5 +1,7 @@
 #include "parser.h"
+#include "ast.h"
 #include "lexer.h"
+#include <stdlib.h>
 
 Parser *init_parser(Lexer *lexer) {
   Parser *p = (Parser *)malloc(sizeof(Parser));
@@ -67,5 +69,33 @@ Token expect(Parser *p, TokenType tokenType) {
 
   fprintf(stderr, "Parse error at line %d: expected token type %d, got '%s'\n",
           peek(p).line, tokenType, peek(p).literal);
+  exit(1);
+}
+
+// primary → INT | FLOAT | IDENTIFIER | "(" expression ")"
+ASTNode *parse_primary(Parser *p) {
+  if (check(p, INT)) {
+    Token t = advance(p);
+    long value = atol(t.literal);
+    return ast_node_int_literal(value, t.line);
+  }
+  if (check(p, FLOAT)) {
+    Token t = advance(p);
+    double value = atof(t.literal);
+    return ast_node_float_literal(value, t.line);
+  }
+  if (check(p, IDENTIFIER)) {
+    Token t = advance(p);
+    return ast_node_identifier(t.literal, t.line);
+  }
+  if (check(p, LEFT_PAREN)) {
+    Token t = advance(p);
+    ASTNode *expr = parse_expr(p);
+    expect(p, RIGHT_PAREN);
+    return expr;
+  }
+
+  fprintf(stderr, "Parse error at line %d: unexpected token '%s'\n",
+          peek(p).line, peek(p).literal);
   exit(1);
 }
