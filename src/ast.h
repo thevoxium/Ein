@@ -107,6 +107,7 @@ struct ASTNode {
     struct {
       ASTNode *object;
       ASTNode **indices;
+      int index_count;
     } index_expression;
 
     struct {
@@ -145,7 +146,8 @@ ASTNode *ast_node_identifier(char *name, int line);
 ASTNode *ast_node_binary_expr(TokenType op, ASTNode *left, ASTNode *right,
                               int line);
 ASTNode *ast_node_unary_expr(TokenType op, ASTNode *operand, int line);
-ASTNode *ast_node_index_expr(ASTNode *object, ASTNode **indices, int line);
+ASTNode *ast_node_index_expr(ASTNode *object, ASTNode **indices, int index_count,
+                             int line);
 ASTNode *ast_node_func_call(char *func_name, ASTNode **args, int arg_count,
                             int line);
 ASTNode *ast_node_tensor_type(char **dims, int dim_count, char *data_type,

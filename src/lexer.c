@@ -90,6 +90,9 @@ void free_lexer(Lexer *lexer) {
     return;
   }
 
+  for (int i = 0; i < lexer->token_count; i++) {
+    free(lexer->token_list[i].literal);
+  }
   free(lexer->token_list);
   free(lexer);
 }
@@ -111,25 +114,30 @@ void skip_whitespace(Lexer *lexer) {
   }
 }
 
-void grow_lexer(Lexer *lexer) {
+bool grow_lexer(Lexer *lexer) {
   if (lexer == NULL) {
-    return;
+    return false;
   }
-  lexer->token_capacity = 2 * lexer->token_capacity;
-  lexer->token_list =
-      realloc(lexer->token_list, lexer->token_capacity * sizeof(Token));
-  if (lexer->token_list == NULL) {
-    free_lexer(lexer);
-    return;
+  int new_capacity = 2 * lexer->token_capacity;
+  Token *new_list = realloc(lexer->token_list, new_capacity * sizeof(Token));
+  if (new_list == NULL) {
+    return false;
   }
+  lexer->token_list = new_list;
+  lexer->token_capacity = new_capacity;
+  return true;
 }
-Token *create_token(char *literal, TokenType tokenType, int line) {
+Token *create_token(const char *literal, TokenType tokenType, int line) {
   Token *t = (Token *)malloc(sizeof(Token));
   if (!t)
     return NULL;
+  t->literal = strdup(literal);
+  if (!t->literal) {
+    free(t);
+    return NULL;
+  }
   t->line = line;
   t->tokenType = tokenType;
-  t->literal = literal;
   return t;
 }
 
@@ -138,9 +146,14 @@ void add_token(Lexer *lexer, Token *token) {
     return;
   }
   if (lexer->token_count >= lexer->token_capacity) {
-    grow_lexer(lexer);
+    if (!grow_lexer(lexer)) {
+      free(token->literal);
+      free(token);
+      return;
+    }
   }
   lexer->token_list[lexer->token_count++] = *token;
+  free(token);
 }
 
 void scan(Lexer *lexer) {
@@ -345,25 +358,26 @@ void scan(Lexer *lexer) {
         t = create_token(literal, RETURN, lexer->line);
       } else if (strcmp(literal, "tensor") == 0) {
         t = create_token(literal, TENSOR, lexer->line);
-      } else if (strcmp(literal, "OR") == 0) {
+      } else if (strcmp(literal, "in") == 0) {
+        t = create_token(literal, IN, lexer->line);
+      } else if (strcmp(literal, "or") == 0 || strcmp(literal, "OR") == 0) {
         t = create_token(literal, OR, lexer->line);
       } else if (strcmp(literal, "and") == 0) {
         t = create_token(literal, AND, lexer->line);
-      } else if (isalphanumeric(literal)) {
-        t = create_token(literal, IDENTIFIER, lexer->line);
       } else if (isint(literal)) {
         t = create_token(literal, INT, lexer->line);
       } else if (isfloat(literal)) {
         t = create_token(literal, FLOAT, lexer->line);
+      } else if (isalphanumeric(literal)) {
+        t = create_token(literal, IDENTIFIER, lexer->line);
       } else {
         t = create_token(literal, UNKNOWN, lexer->line);
       }
 
       if (t != NULL) {
         add_token(lexer, t);
-      } else {
-        free(literal);
       }
+      free(literal);
 
       lexer->position = current_position;
     } break;

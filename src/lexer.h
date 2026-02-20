@@ -72,8 +72,8 @@ bool isint(const char *str);
 bool isfloat(const char *str);
 void scan(Lexer *lexer);
 void skip_whitespace(Lexer *lexer);
-void grow_lexer(Lexer *lexer);
-Token *create_token(char *literal, TokenType tokenType, int line);
+bool grow_lexer(Lexer *lexer);
+Token *create_token(const char *literal, TokenType tokenType, int line);
 void add_token(Lexer *lexer, Token *token);
 void print_tokens(Lexer *lexer);
 

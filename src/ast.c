@@ -156,13 +156,15 @@ ASTNode *ast_node_unary_expr(TokenType op, ASTNode *operand, int line) {
   return node;
 }
 
-ASTNode *ast_node_index_expr(ASTNode *object, ASTNode **indices, int line) {
+ASTNode *ast_node_index_expr(ASTNode *object, ASTNode **indices, int index_count,
+                             int line) {
   ASTNode *node = create_node(NODE_INDEX_EXPR, line);
   if (!node)
     return NULL;
 
   node->data.index_expression.object = object;
   node->data.index_expression.indices = indices;
+  node->data.index_expression.index_count = index_count;
   return node;
 }
 
@@ -251,6 +253,8 @@ void free_ast(ASTNode *node) {
     break;
   case NODE_INDEX_EXPR:
     free_ast(node->data.index_expression.object);
+    for (int i = 0; i < node->data.index_expression.index_count; i++)
+      free_ast(node->data.index_expression.indices[i]);
     free(node->data.index_expression.indices);
     break;
   case NODE_FUNC_CALL:
