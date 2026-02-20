@@ -1,53 +1,40 @@
-program         ::= function_decl* EOF ;
+program             ::= function_def*
 
-function_decl   ::= "func" IDENTIFIER "(" param_list? ")" "->" type block ;
-param_list      ::= param ( "," param )* ;
-param           ::= IDENTIFIER ":" type ;
+function_def        ::= FUNC IDENTIFIER LEFT_PAREN param_list? RIGHT_PAREN
+                        ARROW type block
 
-block           ::= "{" statement* "}" ;
+param_list          ::= param ( COMMA param )*
+param               ::= IDENTIFIER COLON type
 
-statement       ::= var_decl
-                  | assignment_stmt
-                  | for_stmt
-                  | if_stmt
-                  | return_stmt
-                  | expr_stmt ;
+type                ::= TENSOR LESS IDENTIFIER GREATER
+                      | IDENTIFIER
 
-var_decl        ::= IDENTIFIER ":" type ( "=" expression )? ;
-assignment_stmt ::= assignable "=" expression ;
-assignable      ::= IDENTIFIER index_suffix* ;
+block               ::= LEFT_BRACE statement* RIGHT_BRACE
 
-for_stmt        ::= "for" IDENTIFIER "in" expression block ;
-if_stmt         ::= "if" expression block ( "else" block )? ;
-return_stmt     ::= "return" expression? ;
-expr_stmt       ::= expression ;
+statement           ::= var_decl
+                      | for_stmt
+                      | if_stmt
+                      | return_stmt
+                      | assignment_or_expr
 
-expression      ::= assignment ;
-assignment      ::= logic_or ( "=" assignment )? ;
+var_decl            ::= IDENTIFIER COLON type ( EQUAL expression )?
+for_stmt            ::= FOR IDENTIFIER IN expression block
+if_stmt             ::= IF expression block ( ELSE block )?
+return_stmt         ::= RETURN expression?
+assignment_or_expr  ::= expression
+                        ( ( EQUAL | PLUS_EQUAL | MINUS_EQUAL ) expression )?
 
-logic_or        ::= logic_and ( "or" logic_and )* ;
-logic_and       ::= equality ( "and" equality )* ;
-
-equality        ::= comparison ( ( "==" | "!=" ) comparison )* ;
-comparison      ::= term ( ( "<" | "<=" | ">" | ">=" ) term )* ;
-term            ::= factor ( ( "+" | "-" ) factor )* ;
-factor          ::= unary ( "*" unary )* ;
-
-unary           ::= ( "!" | "-" ) unary
-                  | postfix ;
-
-postfix         ::= primary ( index_suffix | call_suffix )* ;
-
-index_suffix    ::= "[" expression ( "," expression )* "]" ;
-call_suffix     ::= "(" argument_list? ")" ;
-argument_list   ::= expression ( "," expression )* ;
-
-primary         ::= INT
-                  | FLOAT
-                  | IDENTIFIER
-                  | "range"
-                  | "(" expression ")" ;
-
-type            ::= tensor_type | IDENTIFIER ;
-tensor_type     ::= "tensor" "<" tensor_spec ">" ;
-tensor_spec     ::= IDENTIFIER ;
+expression          ::= logic_or
+logic_or            ::= logic_and ( OR logic_and )*
+logic_and           ::= equality ( AND equality )*
+equality            ::= comparison ( ( EQUAL_EQUAL | BANG_EQUAL ) comparison )*
+comparison          ::= term ( ( LESS | LESS_EQUAL | GREATER | GREATER_EQUAL ) term )*
+term                ::= factor ( ( PLUS | MINUS ) factor )*
+factor              ::= unary ( STAR unary )*
+unary               ::= ( MINUS | BANG ) unary
+                      | postfix
+postfix             ::= primary ( index_suffix | call_suffix )*
+index_suffix        ::= LEFT_BRACKET expression ( COMMA expression )* RIGHT_BRACKET
+call_suffix         ::= LEFT_PAREN ( expression ( COMMA expression )* )? RIGHT_PAREN
+primary             ::= INT | FLOAT | IDENTIFIER | RANGE
+                      | LEFT_PAREN expression RIGHT_PAREN

@@ -96,6 +96,12 @@ ASTNode *parse_primary(Parser *p) {
     Token t = advance(p);
     return ast_node_identifier(t.literal, t.line);
   }
+  if (check(p, LEFT_PAREN)) {
+    Token t = advance(p);
+    ASTNode *expr = parse_expression(p);
+    expect(p, RIGHT_PAREN);
+    return expr;
+  }
 
   fprintf(stderr, "Parse error at line %d: unexpected token '%s'\n",
           peek(p).line, peek(p).literal);
