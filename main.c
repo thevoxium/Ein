@@ -9,12 +9,12 @@ int main() {
   // char file_name[] = "examples/matmul.ein";
   // char *input = read_ein_file(file_name, &len);
 
-  char input[] = "-a * b";
+  char input[] = "C[i, j] + A[i, k] * B[k, j]";
   Lexer *lexer = init_lexer(input, 100);
   scan(lexer);
 
   Parser *p = init_parser(lexer);
-  ASTNode *node = parse_factor(p);
+  ASTNode *node = parse_term(p);
   print_ast(node, 0);
 
   free_lexer(lexer);

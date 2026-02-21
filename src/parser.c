@@ -194,3 +194,14 @@ ASTNode *parse_factor(Parser *p) {
   }
   return left;
 }
+
+// term ::= factor ( ( PLUS | MINUS ) factor )*
+ASTNode *parse_term(Parser *p) {
+  ASTNode *left = parse_factor(p);
+  while (check(p, PLUS) || check(p, MINUS)) {
+    Token t = advance(p);
+    ASTNode *right = parse_factor(p);
+    left = ast_node_binary_expr(t.tokenType, left, right, t.line);
+  }
+  return left;
+}
