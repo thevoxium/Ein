@@ -205,3 +205,15 @@ ASTNode *parse_term(Parser *p) {
   }
   return left;
 }
+
+// comparison ::= term ( ( LESS | LESS_EQUAL | GREATER | GREATER_EQUAL ) term )*
+ASTNode *parse_comparison(Parser *p) {
+  ASTNode *left = parse_term(p);
+  while (check(p, LESS) || check(p, LESS_EQUAL) || check(p, GREATER_EQUAL) ||
+         check(p, GREATER)) {
+    Token t = advance(p);
+    ASTNode *right = parse_term(p);
+    left = ast_node_binary_expr(t.tokenType, left, right, t.line);
+  }
+  return left;
+}
