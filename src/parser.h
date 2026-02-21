@@ -25,4 +25,6 @@ Token expect(Parser *p, TokenType tokenType);
 ASTNode *parse_primary(Parser *p);
 ASTNode *parse_postfix(Parser *p);
 ASTNode *parse_unary(Parser *p);
+ASTNode *parse_factor(Parser *p);
+
 #endif // !PARSER_H

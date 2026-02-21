@@ -183,3 +183,14 @@ ASTNode *parse_unary(Parser *p) {
   } else
     return parse_postfix(p);
 }
+
+// factor ::= unary ( STAR unary )*
+ASTNode *parse_factor(Parser *p) {
+  ASTNode *left = parse_unary(p);
+  while (check(p, STAR)) {
+    Token t = advance(p);
+    ASTNode *right = parse_unary(p);
+    left = ast_node_binary_expr(STAR, left, right, t.line);
+  }
+  return left;
+}
