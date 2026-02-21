@@ -172,3 +172,14 @@ ASTNode *parse_postfix(Parser *p) {
   }
   return node;
 }
+
+// unary ::= ( MINUS | BANG ) unary
+//          | postfix
+ASTNode *parse_unary(Parser *p) {
+  if (check(p, BANG) || check(p, MINUS)) {
+    Token op = advance(p);
+    ASTNode *operand = parse_unary(p);
+    return ast_node_unary_expr(op.tokenType, operand, op.line);
+  } else
+    return parse_postfix(p);
+}
