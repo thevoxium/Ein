@@ -132,7 +132,7 @@ ASTNode *ast_node_function_decl(char *name, ASTNode **params, int count_params,
   if (!node)
     return NULL;
 
-  node->data.function_decl.name = name;
+  node->data.function_decl.name = strdup(name);
   node->data.function_decl.params = params;
   node->data.function_decl.count_params = count_params;
   node->data.function_decl.return_type = return_type;
@@ -157,7 +157,7 @@ ASTNode *ast_var_decl(char *name, ASTNode *type, ASTNode *initializer,
   if (!node)
     return NULL;
 
-  node->data.var_decl.name = name;
+  node->data.var_decl.name = strdup(name);
   node->data.var_decl.type = type;
   node->data.var_decl.initializer = initializer;
 
@@ -217,7 +217,7 @@ ASTNode *ast_node_identifier(char *name, int line) {
   if (!node)
     return NULL;
 
-  node->data.identifier.name = name;
+  node->data.identifier.name = strdup(name);
   return node;
 }
 
@@ -261,7 +261,7 @@ ASTNode *ast_node_func_call(char *func_name, ASTNode **args, int arg_count,
   if (!node)
     return NULL;
 
-  node->data.func_call.func_name = func_name;
+  node->data.func_call.func_name = strdup(func_name);
   node->data.func_call.args = args;
   node->data.func_call.arg_count = arg_count;
   return node;
@@ -273,9 +273,12 @@ ASTNode *ast_node_tensor_type(char **dims, int dim_count, char *data_type,
   if (!node)
     return NULL;
 
-  node->data.tensor_type.dims = dims;
+  node->data.tensor_type.dims = (char **)malloc(sizeof(char *) * dim_count);
+  for (int i = 0; i < dim_count; i++) {
+    node->data.tensor_type.dims[i] = strdup(dims[i]);
+  }
   node->data.tensor_type.dim_count = dim_count;
-  node->data.tensor_type.data_type = data_type;
+  node->data.tensor_type.data_type = strdup(data_type);
   return node;
 }
 

@@ -9,12 +9,12 @@ int main() {
   // char file_name[] = "examples/matmul.ein";
   // char *input = read_ein_file(file_name, &len);
 
-  char input[] = "1 2.3";
+  char input[] = "foo()";
   Lexer *lexer = init_lexer(input, 100);
   scan(lexer);
 
   Parser *p = init_parser(lexer);
-  ASTNode *node = parse_primary(p);
+  ASTNode *node = parse_postfix(p);
   print_ast(node, 0);
 
   free_lexer(lexer);

@@ -96,14 +96,79 @@ ASTNode *parse_primary(Parser *p) {
     Token t = advance(p);
     return ast_node_identifier(t.literal, t.line);
   }
-  if (check(p, LEFT_PAREN)) {
-    Token t = advance(p);
-    ASTNode *expr = parse_expression(p);
-    expect(p, RIGHT_PAREN);
-    return expr;
-  }
+  // if (check(p, LEFT_PAREN)) {
+  //   Token t = advance(p);
+  //   ASTNode *expr = parse_expression(p);
+  //   expect(p, RIGHT_PAREN);
+  //   return expr;
+  // }
 
   fprintf(stderr, "Parse error at line %d: unexpected token '%s'\n",
           peek(p).line, peek(p).literal);
   exit(1);
+}
+
+// postfix ::= primary ( index_suffix | call_suffix )*
+ASTNode *parse_postfix(Parser *p) {
+  ASTNode *node = parse_primary(p);
+
+  while (!is_at_end(p)) {
+    if (check(p, LEFT_BRACKET)) {
+      Token bracket = advance(p);
+      int capacity = 4;
+      int index_count = 0;
+      ASTNode **indices = (ASTNode **)malloc(sizeof(ASTNode *) * capacity);
+      // indices[index_count++] = parse_expression(p);
+      indices[index_count++] = parse_primary(p);
+
+      while (check(p, COMMA)) {
+        Token comma = advance(p);
+        if (index_count >= capacity) {
+          capacity *= 2;
+          indices = (ASTNode **)realloc(indices, sizeof(ASTNode *) * capacity);
+        }
+
+        // indices[index_count++] = parse_expression(p);
+        indices[index_count++] = parse_primary(p);
+      }
+
+      expect(p, RIGHT_BRACKET);
+      int line = node->line;
+      node = ast_node_index_expr(node, indices, index_count, line);
+      return node;
+
+    } else if (check(p, LEFT_PAREN)) {
+      Token parantheses = advance(p);
+
+      char *name = node->data.identifier.name;
+      int capacity = 4;
+      int args_count = 0;
+      ASTNode **args = (ASTNode **)malloc(sizeof(ASTNode *) * capacity);
+      // args[args_count++] = parse_expression(p);
+
+      if (!check(p, RIGHT_PAREN)) {
+        args[args_count++] = parse_primary(p);
+        while (check(p, COMMA)) {
+          Token comma = advance(p);
+          if (args_count >= capacity) {
+            capacity *= 2;
+            args = (ASTNode **)realloc(args, sizeof(ASTNode *) * capacity);
+          }
+
+          // args[args_count++] = parse_expression(p);
+          args[args_count++] = parse_primary(p);
+        }
+      }
+
+      expect(p, RIGHT_PAREN);
+      int line = node->line;
+      free(node);
+      node = ast_node_func_call(name, args, args_count, line);
+      return node;
+
+    } else {
+      break;
+    }
+  }
+  return node;
 }

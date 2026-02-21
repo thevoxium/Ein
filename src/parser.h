@@ -23,5 +23,5 @@ bool match(Parser *p, TokenType *types, int count);
 Token expect(Parser *p, TokenType tokenType);
 
 ASTNode *parse_primary(Parser *p);
-
+ASTNode *parse_postfix(Parser *p);
 #endif // !PARSER_H
