@@ -19,7 +19,6 @@ Token previous(Parser *p);
 bool is_at_end(Parser *p);
 bool check(Parser *p, TokenType tokenType);
 Token advance(Parser *p);
-bool match(Parser *p, TokenType *types, int count);
 Token expect(Parser *p, TokenType tokenType);
 
 ASTNode *parse_primary(Parser *p);

@@ -52,16 +52,6 @@ Token advance(Parser *p) {
   return t;
 }
 
-bool match(Parser *p, TokenType *types, int count) {
-  for (int i = 0; i < count; i++) {
-    if (check(p, types[i])) {
-      advance(p);
-      return true;
-    }
-  }
-  return false;
-}
-
 Token expect(Parser *p, TokenType tokenType) {
   if (check(p, tokenType)) {
     return advance(p);
