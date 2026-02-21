@@ -229,7 +229,7 @@ ASTNode *parse_logic_and(Parser *p) {
 // logic_or ::= logic_and ( OR logic_and )*
 ASTNode *parse_logic_or(Parser *p) {
   ASTNode *left = parse_logic_and(p);
-  while (check(p, AND)) {
+  while (check(p, OR)) {
     Token t = advance(p);
     ASTNode *right = parse_logic_and(p);
     left = ast_node_binary_expr(t.tokenType, left, right, t.line);

@@ -14,10 +14,10 @@ typedef struct Parser {
 Parser *init_parser(Lexer *lexer);
 void free_parser(Parser *p);
 
-Token peek(Parser *p);
-Token previous(Parser *p);
 bool is_at_end(Parser *p);
 bool check(Parser *p, TokenType tokenType);
+Token peek(Parser *p);
+Token previous(Parser *p);
 Token advance(Parser *p);
 Token expect(Parser *p, TokenType tokenType);
 
