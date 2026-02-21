@@ -96,12 +96,12 @@ ASTNode *parse_primary(Parser *p) {
     Token t = advance(p);
     return ast_node_identifier(t.literal, t.line);
   }
-  // if (check(p, LEFT_PAREN)) {
-  //   Token t = advance(p);
-  //   ASTNode *expr = parse_expression(p);
-  //   expect(p, RIGHT_PAREN);
-  //   return expr;
-  // }
+  if (check(p, LEFT_PAREN)) {
+    Token t = advance(p);
+    ASTNode *expr = parse_expression(p);
+    expect(p, RIGHT_PAREN);
+    return expr;
+  }
 
   fprintf(stderr, "Parse error at line %d: unexpected token '%s'\n",
           peek(p).line, peek(p).literal);
@@ -118,8 +118,7 @@ ASTNode *parse_postfix(Parser *p) {
       int capacity = 4;
       int index_count = 0;
       ASTNode **indices = (ASTNode **)malloc(sizeof(ASTNode *) * capacity);
-      // indices[index_count++] = parse_expression(p);
-      indices[index_count++] = parse_primary(p);
+      indices[index_count++] = parse_expression(p);
 
       while (check(p, COMMA)) {
         Token comma = advance(p);
@@ -128,8 +127,7 @@ ASTNode *parse_postfix(Parser *p) {
           indices = (ASTNode **)realloc(indices, sizeof(ASTNode *) * capacity);
         }
 
-        // indices[index_count++] = parse_expression(p);
-        indices[index_count++] = parse_primary(p);
+        indices[index_count++] = parse_expression(p);
       }
 
       expect(p, RIGHT_BRACKET);
@@ -144,10 +142,9 @@ ASTNode *parse_postfix(Parser *p) {
       int capacity = 4;
       int args_count = 0;
       ASTNode **args = (ASTNode **)malloc(sizeof(ASTNode *) * capacity);
-      // args[args_count++] = parse_expression(p);
 
       if (!check(p, RIGHT_PAREN)) {
-        args[args_count++] = parse_primary(p);
+        args[args_count++] = parse_expression(p);
         while (check(p, COMMA)) {
           Token comma = advance(p);
           if (args_count >= capacity) {
@@ -155,8 +152,7 @@ ASTNode *parse_postfix(Parser *p) {
             args = (ASTNode **)realloc(args, sizeof(ASTNode *) * capacity);
           }
 
-          // args[args_count++] = parse_expression(p);
-          args[args_count++] = parse_primary(p);
+          args[args_count++] = parse_expression(p);
         }
       }
 
@@ -217,3 +213,38 @@ ASTNode *parse_comparison(Parser *p) {
   }
   return left;
 }
+
+// equality ::= comparison ( ( EQUAL_EQUAL | BANG_EQUAL ) comparison )*
+ASTNode *parse_equality(Parser *p) {
+  ASTNode *left = parse_comparison(p);
+  while (check(p, EQUAL_EQUAL) || check(p, BANG_EQUAL)) {
+    Token t = advance(p);
+    ASTNode *right = parse_comparison(p);
+    left = ast_node_binary_expr(t.tokenType, left, right, t.line);
+  }
+  return left;
+}
+
+// logic_and ::= equality ( AND equality )*
+ASTNode *parse_logic_and(Parser *p) {
+  ASTNode *left = parse_equality(p);
+  while (check(p, AND)) {
+    Token t = advance(p);
+    ASTNode *right = parse_equality(p);
+    left = ast_node_binary_expr(t.tokenType, left, right, t.line);
+  }
+  return left;
+}
+
+// logic_or ::= logic_and ( OR logic_and )*
+ASTNode *parse_logic_or(Parser *p) {
+  ASTNode *left = parse_logic_and(p);
+  while (check(p, AND)) {
+    Token t = advance(p);
+    ASTNode *right = parse_logic_and(p);
+    left = ast_node_binary_expr(t.tokenType, left, right, t.line);
+  }
+  return left;
+}
+
+ASTNode *parse_expression(Parser *p) { return parse_logic_or(p); }

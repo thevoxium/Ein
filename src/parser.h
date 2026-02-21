@@ -28,5 +28,8 @@ ASTNode *parse_unary(Parser *p);
 ASTNode *parse_factor(Parser *p);
 ASTNode *parse_term(Parser *p);
 ASTNode *parse_comparison(Parser *p);
-
+ASTNode *parse_equality(Parser *p);
+ASTNode *parse_logic_and(Parser *p);
+ASTNode *parse_logic_or(Parser *p);
+ASTNode *parse_expression(Parser *p);
 #endif // !PARSER_H
