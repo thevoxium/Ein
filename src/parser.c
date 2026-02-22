@@ -364,3 +364,23 @@ ASTNode *parse_stmt(Parser *p) {
   }
   return parse_assignment_or_expr(p);
 }
+
+// block ::= LEFT_BRACE statement* RIGHT_BRACE
+ASTNode *parse_block(Parser *p) {
+  Token left_brace = expect(p, LEFT_BRACE);
+  int current_capacity = 8;
+  int current_count = 0;
+  ASTNode **statements =
+      (ASTNode **)malloc(sizeof(ASTNode *) * current_capacity);
+
+  while (check(p, RIGHT_BRACE) == false && is_at_end(p) == false) {
+    if (current_count >= current_capacity) {
+      current_capacity *= 2;
+      statements =
+          (ASTNode **)realloc(statements, sizeof(ASTNode *) * current_capacity);
+    }
+    statements[current_count++] = parse_stmt(p);
+  }
+  expect(p, RIGHT_BRACE);
+  return ast_node_block(statements, current_count, left_brace.line);
+}
