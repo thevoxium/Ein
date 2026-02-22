@@ -14,7 +14,7 @@ int main() {
   scan(lexer);
 
   Parser *p = init_parser(lexer);
-  ASTNode *node = parse_assignment_or_expr(p);
+  ASTNode *node = parse_stmt(p);
   print_ast(node, 0);
 
   free_lexer(lexer);

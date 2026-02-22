@@ -341,3 +341,26 @@ ASTNode *parse_assignment_or_expr(Parser *p) {
   }
   return left;
 }
+
+// statement ::= var_decl
+//  | for_stmt
+//  | if_stmt
+//  | return_stmt
+//  | assignment_or_expr
+ASTNode *parse_stmt(Parser *p) {
+  if (check(p, FOR)) {
+    return NULL;
+    // return parse_for(p);
+  }
+  if (check(p, IF)) {
+    return NULL;
+    // return parse_if(p);
+  }
+  if (check(p, RETURN)) {
+    return parse_return_stmt(p);
+  }
+  if (check(p, IDENTIFIER) && check_next(p, COLON)) {
+    return parse_var_decl(p);
+  }
+  return parse_assignment_or_expr(p);
+}
