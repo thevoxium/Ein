@@ -410,3 +410,55 @@ ASTNode *parse_if(Parser *p) {
 
   return ast_node_if(condition, then_block, else_block, if_token.line);
 }
+
+// function_def ::= FUNC IDENTIFIER LEFT_PAREN param_list? RIGHT_PAREN ARROW
+// type block
+ASTNode *parse_function_def(Parser *p) {
+  Token func = expect(p, FUNC);
+  Token identifier = expect(p, IDENTIFIER);
+  char *func_name = strdup(identifier.literal);
+
+  expect(p, LEFT_PAREN);
+  int current_capacity = 4;
+  int current_count = 0;
+  ASTNode **params = (ASTNode **)malloc(current_capacity * sizeof(ASTNode *));
+
+  if (check(p, RIGHT_PAREN) == false) {
+    params[current_count++] = parse_var_decl(p);
+    while (check(p, COMMA) && is_at_end(p) == false) {
+      advance(p);
+
+      if (current_count >= current_capacity) {
+        current_capacity *= 2;
+        params =
+            (ASTNode **)realloc(params, sizeof(ASTNode *) * current_capacity);
+      }
+      params[current_count++] = parse_var_decl(p);
+    }
+  }
+  expect(p, RIGHT_PAREN);
+  expect(p, ARROW);
+
+  ASTNode *type = parse_type(p);
+  ASTNode *body = parse_block(p);
+
+  return ast_node_function_decl(func_name, params, current_count, type, body,
+                                identifier.line);
+}
+
+// program ::= function_def*
+ASTNode *parse_program(Parser *p) {
+  int capacity = 4;
+  int count = 0;
+  ASTNode **functions = (ASTNode **)malloc(sizeof(ASTNode *) * capacity);
+
+  while (!is_at_end(p)) {
+    if (count >= capacity) {
+      capacity *= 2;
+      functions = (ASTNode **)realloc(functions, sizeof(ASTNode *) * capacity);
+    }
+    functions[count++] = parse_function_def(p);
+  }
+
+  return ast_node_program(functions, count, 0);
+}
