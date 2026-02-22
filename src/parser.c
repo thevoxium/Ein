@@ -321,7 +321,7 @@ ASTNode *parse_var_decl(Parser *p) {
   ASTNode *type = parse_type(p);
   ASTNode *initializer = NULL;
 
-  if (check_next(p, EQUAL)) {
+  if (check(p, EQUAL)) {
     advance(p);
     initializer = parse_expression(p);
   }
