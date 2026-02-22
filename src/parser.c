@@ -313,3 +313,18 @@ ASTNode *parse_return_stmt(Parser *p) {
   }
   return ast_node_return(return_val, return_t.line);
 }
+
+// var_decl ::= IDENTIFIER COLON type ( EQUAL expression )?
+ASTNode *parse_var_decl(Parser *p) {
+  Token identifier = expect(p, IDENTIFIER);
+  expect(p, COLON);
+  ASTNode *type = parse_type(p);
+  ASTNode *initializer = NULL;
+
+  if (check_next(p, EQUAL)) {
+    advance(p);
+    initializer = parse_expression(p);
+  }
+  char *name = strdup(identifier.literal);
+  return ast_node_var_decl(name, type, initializer, identifier.line);
+}

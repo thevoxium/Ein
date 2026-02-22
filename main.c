@@ -9,7 +9,7 @@ int main() {
   // char file_name[] = "examples/matmul.ein";
   // char *input = read_ein_file(file_name, &len);
 
-  char input[] = "return a + b * c";
+  char input[] = "C: tensor<MxNxf32> = 0.0";
   Lexer *lexer = init_lexer(input, 100);
   scan(lexer);
 
