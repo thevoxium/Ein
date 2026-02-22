@@ -35,4 +35,5 @@ ASTNode *parse_expression(Parser *p);
 ASTNode *parse_type(Parser *p);
 ASTNode *parse_return_stmt(Parser *p);
 ASTNode *parse_var_decl(Parser *p);
+ASTNode *parse_assignment_or_expr(Parser *p);
 #endif // !PARSER_H

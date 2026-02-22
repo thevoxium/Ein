@@ -328,3 +328,16 @@ ASTNode *parse_var_decl(Parser *p) {
   char *name = strdup(identifier.literal);
   return ast_node_var_decl(name, type, initializer, identifier.line);
 }
+
+// assignment_or_expr ::= expression ( ( EQUAL | PLUS_EQUAL | MINUS_EQUAL )
+// expression )?
+ASTNode *parse_assignment_or_expr(Parser *p) {
+  ASTNode *left = parse_expression(p);
+
+  if (check(p, EQUAL)) {
+    Token op = advance(p);
+    ASTNode *right = parse_expression(p);
+    return ast_node_assignment(left, right, op.line);
+  }
+  return left;
+}
