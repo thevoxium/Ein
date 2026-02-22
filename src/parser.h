@@ -16,6 +16,7 @@ void free_parser(Parser *p);
 
 bool is_at_end(Parser *p);
 bool check(Parser *p, TokenType tokenType);
+bool check_next(Parser *p, TokenType tokenType);
 Token peek(Parser *p);
 Token previous(Parser *p);
 Token advance(Parser *p);
@@ -31,4 +32,5 @@ ASTNode *parse_equality(Parser *p);
 ASTNode *parse_logic_and(Parser *p);
 ASTNode *parse_logic_or(Parser *p);
 ASTNode *parse_expression(Parser *p);
+ASTNode *parse_type(Parser *p);
 #endif // !PARSER_H

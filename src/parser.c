@@ -1,7 +1,9 @@
 #include "parser.h"
 #include "ast.h"
 #include "lexer.h"
+#include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 Parser *init_parser(Lexer *lexer) {
   Parser *p = (Parser *)malloc(sizeof(Parser));
@@ -44,6 +46,13 @@ bool check(Parser *p, TokenType tokenType) {
   if (is_at_end(p))
     return false;
   return (p->tokens[p->current].tokenType == tokenType);
+}
+
+bool check_next(Parser *p, TokenType tokenType) {
+  if (is_at_end(p)) {
+    return false;
+  }
+  return p->tokens[p->current + 1].tokenType == tokenType;
 }
 
 Token advance(Parser *p) {
@@ -238,3 +247,59 @@ ASTNode *parse_logic_or(Parser *p) {
 }
 
 ASTNode *parse_expression(Parser *p) { return parse_logic_or(p); }
+
+// type ::= TENSOR LESS IDENTIFIER GREATER
+//  | IDENTIFIER
+ASTNode *parse_type(Parser *p) {
+  if (check(p, TENSOR)) {
+    Token tensor = advance(p);
+    expect(p, LESS);
+    Token identifier = expect(p, IDENTIFIER);
+    expect(p, GREATER);
+
+    char *s = identifier.literal;
+    int segs = 0;
+    while (*s != '\0') {
+      if (*s == 'x')
+        segs++;
+      s++;
+    }
+    segs++;
+
+    char **dims = (char **)malloc(segs * sizeof(char *));
+    assert(dims != NULL);
+
+    s = identifier.literal;
+    for (int i = 0; i < segs; i++) {
+      if (*s == 'x') {
+        s++;
+      }
+      int len = 0;
+      while (*s != '\0' && *s != 'x') {
+        len++;
+        s++;
+      }
+      char *segment = strndup(s - len, len);
+      dims[i] = segment;
+    }
+
+    ASTNode *result =
+        ast_node_tensor_type(dims, segs - 1, dims[segs - 1], tensor.line);
+
+    for (int i = 0; i < segs; i++) {
+      free(dims[i]);
+    }
+    free(dims);
+    return result;
+
+  } else if (check(p, IDENTIFIER)) {
+    Token t = advance(p);
+    return ast_node_identifier(t.literal, t.line);
+  } else {
+    fprintf(stderr,
+            "Parse error at line %d: expected token type %d, got '%s'\n",
+            p->tokens[p->current].line, p->tokens[p->current].tokenType,
+            p->tokens[p->current].literal);
+    exit(1);
+  }
+}
