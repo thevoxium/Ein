@@ -303,3 +303,13 @@ ASTNode *parse_type(Parser *p) {
     exit(1);
   }
 }
+
+// return_stmt ::= RETURN expression?
+ASTNode *parse_return_stmt(Parser *p) {
+  Token return_t = expect(p, RETURN);
+  ASTNode *return_val = NULL;
+  if (is_at_end(p) == false && !check(p, RIGHT_BRACE)) {
+    return_val = parse_expression(p);
+  }
+  return ast_node_return(return_val, return_t.line);
+}
