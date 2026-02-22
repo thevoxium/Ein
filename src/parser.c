@@ -96,7 +96,7 @@ ASTNode *parse_primary(Parser *p) {
     return ast_node_identifier(t.literal, t.line);
   }
   if (check(p, LEFT_PAREN)) {
-    Token t = advance(p);
+    advance(p);
     ASTNode *expr = parse_expression(p);
     expect(p, RIGHT_PAREN);
     return expr;
@@ -113,14 +113,14 @@ ASTNode *parse_postfix(Parser *p) {
 
   while (!is_at_end(p)) {
     if (check(p, LEFT_BRACKET)) {
-      Token bracket = advance(p);
+      advance(p);
       int capacity = 4;
       int index_count = 0;
       ASTNode **indices = (ASTNode **)malloc(sizeof(ASTNode *) * capacity);
       indices[index_count++] = parse_expression(p);
 
       while (check(p, COMMA)) {
-        Token comma = advance(p);
+        advance(p);
         if (index_count >= capacity) {
           capacity *= 2;
           indices = (ASTNode **)realloc(indices, sizeof(ASTNode *) * capacity);
@@ -135,7 +135,7 @@ ASTNode *parse_postfix(Parser *p) {
       return node;
 
     } else if (check(p, LEFT_PAREN)) {
-      Token parantheses = advance(p);
+      advance(p);
 
       char *name = node->data.identifier.name;
       int capacity = 4;
@@ -145,7 +145,7 @@ ASTNode *parse_postfix(Parser *p) {
       if (!check(p, RIGHT_PAREN)) {
         args[args_count++] = parse_expression(p);
         while (check(p, COMMA)) {
-          Token comma = advance(p);
+          advance(p);
           if (args_count >= capacity) {
             capacity *= 2;
             args = (ASTNode **)realloc(args, sizeof(ASTNode *) * capacity);
@@ -414,7 +414,7 @@ ASTNode *parse_if(Parser *p) {
 // function_def ::= FUNC IDENTIFIER LEFT_PAREN param_list? RIGHT_PAREN ARROW
 // type block
 ASTNode *parse_function_def(Parser *p) {
-  Token func = expect(p, FUNC);
+  expect(p, FUNC);
   Token identifier = expect(p, IDENTIFIER);
   char *func_name = strdup(identifier.literal);
 
