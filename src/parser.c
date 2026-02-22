@@ -349,12 +349,10 @@ ASTNode *parse_assignment_or_expr(Parser *p) {
 //  | assignment_or_expr
 ASTNode *parse_stmt(Parser *p) {
   if (check(p, FOR)) {
-    return NULL;
-    // return parse_for(p);
+    return parse_for(p);
   }
   if (check(p, IF)) {
-    return NULL;
-    // return parse_if(p);
+    return parse_if(p);
   }
   if (check(p, RETURN)) {
     return parse_return_stmt(p);
@@ -383,4 +381,32 @@ ASTNode *parse_block(Parser *p) {
   }
   expect(p, RIGHT_BRACE);
   return ast_node_block(statements, current_count, left_brace.line);
+}
+
+// for_stmt ::= FOR IDENTIFIER IN expression block
+ASTNode *parse_for(Parser *p) {
+  Token for_token = expect(p, FOR);
+  Token loop_var = expect(p, IDENTIFIER);
+  char *name = strdup(loop_var.literal);
+  ASTNode *identifier = ast_node_identifier(name, loop_var.line);
+
+  expect(p, IN);
+  ASTNode *iterable = parse_expression(p);
+  ASTNode *block_body = parse_block(p);
+  return ast_node_for(identifier, iterable, block_body, for_token.line);
+}
+
+// if_stmt ::= IF expression block ( ELSE block )?
+ASTNode *parse_if(Parser *p) {
+  Token if_token = expect(p, IF);
+  ASTNode *condition = parse_expression(p);
+  ASTNode *then_block = parse_block(p);
+  ASTNode *else_block = NULL;
+
+  if (check(p, ELSE)) {
+    advance(p);
+    else_block = parse_block(p);
+  }
+
+  return ast_node_if(condition, then_block, else_block, if_token.line);
 }
